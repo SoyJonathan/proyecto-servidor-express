@@ -1,31 +1,18 @@
 const express = require("express")
-const app = express()
 
-const tareas = [
-  {
-    "id":"123456",
-    "isCompleted":false,
-    "description":"Walk the dog",
-  },
-  {
-    "id":"789101",
-    "isCompleted":false,
-    "description":"Doing homework",
-  },
-  {
-    "id":"212226",
-    "isCompleted":false,
-    "description":"sweep the floor",
-  }
-]
+const app = express();
 
-app.use(express.json())
+const mostrarTarea = require('./list-view-router')
+const editarTarea = require('./list-edit-router')
 
-app.get("/", (req, res) => {
-  res.json(tareas)
+app.get('/', (req, res) => {
+  res.send("Servidor con Express");
 })
+
+app.use(express.json());
+app.use('/mostrarTarea', mostrarTarea);
+app.use('/editarListaTarea', editarTarea);
 
 app.listen(8080, () => {
-  console.log("Listening to port 8080")
-})
-
+  console.log('Servidor corriendo en el puerto 8080')
+});
