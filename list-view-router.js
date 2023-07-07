@@ -1,20 +1,31 @@
-const express = require("express")
-let tareaJson = require('./tareas.json')
+const express = require('express');
+const router = express.Router();
 
-const router = express.Router()
 
-router.get('/', (req, res) => {
-  res.send(tareaJson);
+const tasks = require('./tasks.json');
+
+
+const validateParameters = (req, res, next) => {
+  const { param1, param2 } = req.params;
+  if (!param1 || !param2) {
+    return res.status(400).json({ error: 'Invalid parameters' });
+  }
+
+  next();
+};
+
+
+router.get('/completed', (req, res) => {
+  const completedTasks = tasks.filter(task => task.isCompleted);
+
+  res.json(completedTasks);
 });
 
-router.get('/completadas', (req, res) => {
-  let completadas = tareaJson.filter((tarea) => tarea.isCompleted === true)
-  res.send(completadas)
-})
 
-router.get('/incompletas', (req, res) => {
-  let incompletas = tareaJson.filter((tarea) => tarea.isCompleted === false)
-  res.send(incompletas)
-})
+router.get('/incomplete', validateParameters,(req, res) => {
+  const incompleteTasks = tasks.filter(task => !task.isCompleted);
 
-module.exports = router
+  res.json(incompleteTasks);
+});
+
+module.exports = router;
