@@ -1,45 +1,53 @@
-const express = require("express")
+const express = require('express');
+const router = express.Router();
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
-let tareasJson = require('./tareas.json')
+// Array of predefined users
+const users = [
+  { username: 'user1', password: 'password1' },
+  { username: 'user2', password: 'password2' }
+];
 
-const router = express.Router()
+router.post('/login', (req, res) => {
+  const { username, password } = req.body;
 
-router.get('/', (req, res) => {
-  res.send('Ruta para crear, editar y actualizar tareas (list-edit-router)');
-})
+ 
+  const user = users.find(user => user.username === username && user.password === password);
 
-router.post('/', (req, res) => {
-  let nuevaTarea = req.body; // Obtener la tarea desde el cuerpo de la solicitud
-  tareasJson.push(nuevaTarea); // Agregar nueva tarea
-  console.log(tareasJson)
-  res.send('Tarea creada');
-});
-
-router.delete('/', (req, res) => {
-  let tareaId = req.params.id;
-  let tareaIndex = tareasJson.findIndex((tarea) => tarea.id == tareaId);
-  
-if (tareaIndex >=0) {
-  tareasJson = tareasJson.filter((tarea) => tareaId != tareaId);// utiliza el metodo filter para eliminar tarea
-  console.log(tareasJson)
-  res.send('Tarea eliminada');
-} else {
-  res.status(404).send('Tarea no encontrada')
-}
-});
-
-router.put('/', (req, res) => {
-  let tareaId = req.params.id;
-  let tareaIndex = tareasJson.findIndex((tarea) => tarea.id == tareaId);
-
-  if (tareaIndex >= 0) {
-    let tareaActualizada = req.body;
-    tareasJson = tareasJson.map((tarea) => (tarea.id == tareaId ? tareaActualizada : tarea));//Utiliza el metodo map para actualizar la tarea por ID
-    res.send('Tarea Actualizada')
-    console.log(tareasJson)
-  } else {
-    res.status(404).send('Tarea no encontrada');
+  if (!user) {
+    return res.status(401).json({ error: 'Invalid credentials' });
   }
+
+  // Generate JWT token
+  const token = jwt.sign({ username: user.username }, process.env.SECRET_KEY, { expiresIn: '1h' });
+
+  res.json({ token });
+});
+
+// Middleware to protect the routes
+function validateToken(req, res, next) {
+  const Header = req.headers['authorization'];
+  const token = Header && Header.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  jwt.verify(token, process.env.SECRET_KEY, (err, user) => {
+    if (err) {
+      return res.status(403).json({ error: 'Invalid token' });
+    }
+
+   
+    req.user = user;
+    next();
+  });
+}
+
+// Protected route 
+router.get('/protected', validateToken, (req, res) => {
+  res.json({ message: 'Protected route accessed successfully', user: req.user });
 });
 
 module.exports = router;

@@ -1,0 +1,22 @@
+[
+    {
+      "id": 1,
+      "description": "sacar a pasear el perro",
+      "isCmpleted": false
+    },
+    {
+      "id": 2,
+      "description": "hacer ejercicio",
+      "isCompleted": true
+    },
+    {
+      "id": 3,
+      "description": "limpiar la casa",
+      "isCompleted": false
+    },
+    {
+        "id": 4,
+        "description": "jugar futbol",
+        "isCompleted": true
+    }
+  ]
